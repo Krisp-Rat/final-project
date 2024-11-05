@@ -1,7 +1,7 @@
 # taken from assignment 2 
 #CHANGES MADE FROM GYMNASIUM TO GYM
     # removed info var as reset does not return info
-    #
+    # removed truncated as truncated does not exist: only done
 
 # Install required libraries
 # Import required libraries
@@ -86,26 +86,33 @@ class DQN:
             # initialize sequence S and preprocessed sequence o
             seq  = [None , None]
             state = self.env.reset()
+            print(state)
             seq[0] = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             done = False
             rewards = 0
             eps = epsilon ** i if not greedy else 0
+            step = 0
             while not done:
+                step +=1
                 # Select action
                 action_type = action_function(seq[0], eps)
-                observation, reward, terminated, truncated, _ = self.env.step(action_type.item())
+                observation, reward, done, info = self.env.step(action_type.item())
                 state = torch.tensor(observation, device=device, dtype=torch.float32).unsqueeze(0)
                 # Set sequence
                 seq[1] = state
-                self.append(state=seq[0], action=action_type, reward=reward, next_state=seq[1], done=terminated)
-                if terminated:
+                self.append(state=seq[0], action=action_type, reward=reward, next_state=seq[1], done=done)
+                if done:
                     seq[1] = None
                 rewards += reward
                 # store transition in replay buffer
                 seq[0] = state
                 
                 self.r(discount)
-                done = truncated or terminated
+                if greedy == True:
+                    self.env.render()
+                if step >500:
+                    done = True
+                
             # Decay epsilon after every episode
             # epsilon *= epsilon
             total_reward[i] = rewards  

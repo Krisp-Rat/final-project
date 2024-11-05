@@ -6,25 +6,30 @@ import gym # use pip install gym==0.23.1 , SMB does not work with new gym
 import retro # use to import sonic
 import DQN # our assignment 2 DQN modified for gym instead of gymnasium, may change later
 
-#create environment
+#create environment and agent
 env = gym_super_mario_bros.make('SuperMarioBros-v0')
 env = JoypadSpace(env, SIMPLE_MOVEMENT)
+env.reset()
+Buffer_Size = 5000
+Mario = DQN.DQN(Buffer_Size, env)
+print("Sucessfully Created agent:", Mario)
 
 #HyperParameters:
-Buffer_Size = 5000
 max_episodes = 600
 epsilon = .8
 discount = 0.99
+action = Mario.action
 
 
-#put DQN here
-Mario = DQN.DQN(Buffer_Size, env)
-print("Sucessfully Created agent", Mario)
+#Run DQN here
+total_rewards = Mario.train(episodes=max_episodes, epsilon=epsilon , discount=discount,action_function=action, greedy=False )
+#testing
+total_rewards = Mario.train(episodes=1, epsilon=epsilon , discount=discount,action_function=action, greedy=True )
+
 done = True
 for step in range(5000):
     if done:
         state = env.reset()
     state, reward, done, info = env.step(env.action_space.sample())
     env.render()
-
 env.close()
