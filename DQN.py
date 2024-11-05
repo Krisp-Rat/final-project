@@ -1,4 +1,7 @@
-# taken from assignment 2
+# taken from assignment 2 
+#CHANGES MADE FROM GYMNASIUM TO GYM
+    # removed info var as reset does not return info
+    #
 
 # Install required libraries
 # Import required libraries
@@ -38,7 +41,7 @@ class DQN:
     def __init__(self, N, env):
     # initialize environment
         self.env = env
-        state, info = self.env.reset()
+        state = self.env.reset()
         # initialize replay memory to capacity N
         self.pointer = 0
         self.policy_net = Net(len(state), self.env.action_space.n).to(device)
@@ -82,7 +85,7 @@ class DQN:
                 self.target_net.load_state_dict(self.policy_net.state_dict())
             # initialize sequence S and preprocessed sequence o
             seq  = [None , None]
-            state, info = self.env.reset()
+            state = self.env.reset()
             seq[0] = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             done = False
             rewards = 0
@@ -151,10 +154,10 @@ class DQN:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+    # Save/load the current weights
     def load(self,filename):
         with open(filename, 'rb') as file:
             pickle.load(self.policy_net.state_dict(), file,protocol=pickle.HIGHEST_PROTOCOL)
-    # Save the current weights
     def save(self, filename):
         with open(filename, 'wb') as file:
             pickle.dump(self.policy_net.state_dict(), file,protocol=pickle.HIGHEST_PROTOCOL)
