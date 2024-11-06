@@ -32,6 +32,7 @@ class Net(nn.Module):
         self.layer2 = nn.Linear(32, 32)
         self.layer3 = nn.Linear(32, action)
 
+
     def forward(self, x):
         x = F.relu(self.layer1(x))
         x = F.relu(self.layer2(x))
