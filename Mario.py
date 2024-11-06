@@ -1,8 +1,8 @@
 # make sure to use python 3.8, use virtual enviornment and reopen vscode 
 import gym.wrappers
 import gym.wrappers.frame_stack
-import gym.wrappers.gray_scale_observation
-import gym.wrappers.resize_observation
+from gym.wrappers import GrayScaleObservation 
+from gym.wrappers import ResizeObservation
 from nes_py.wrappers import JoypadSpace
 import gym_super_mario_bros # install the VS code Developer kit?? refer to nes_py
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
@@ -14,10 +14,14 @@ from gym.spaces import Box
 #create environment and agent + image preprocessing
 env = gym_super_mario_bros.make('SuperMarioBros-v0')
 env = JoypadSpace(env, SIMPLE_MOVEMENT)
-env.reset()
+state = env.reset()
+print("inital state size", state.shape )
 # env = gym.wrappers.frame_stack.
-env = gym.wrappers.gray_scale_observation(env)
-env = gym.wrappers.resize_observation(env, shape= 84)
+env = GrayScaleObservation(env)
+env = ResizeObservation(env, shape= 84)
+state = env.reset()
+print("mod state size", state.shape )
+
 
 Buffer_Size = 5000
 Mario = DQN.DQN(Buffer_Size, env)

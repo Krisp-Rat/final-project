@@ -28,12 +28,20 @@ CUDA_LAUNCH_BLOCKING=1
 class Net(nn.Module):
     def __init__(self, obs, action):
         super(Net, self).__init__()
-        self.layer1 = nn.Linear(obs, 32)
-        self.layer2 = nn.Linear(32, 32)
-        self.layer3 = nn.Linear(32, action)
+        self.conv1 = nn.Conv2d(obs,32,kernel_size = 8, stride = 4)
+        self.conv2 = nn.Conv2d(32,64, kernel_size=4, stride=2)
+        self.conv3 = nn.Conv2d(64,64,kernel_size=3, stride=1)
+
+        self.layer1 = nn.Linear(64*7*7, 512)
+        self.layer2 = nn.Linear(512, 256)
+        self.layer3 = nn.Linear(256, action)
 
 
     def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = x.view(x.size(0), -1) 
         x = F.relu(self.layer1(x))
         x = F.relu(self.layer2(x))
         return self.layer3(x)
