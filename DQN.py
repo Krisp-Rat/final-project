@@ -3,6 +3,9 @@
     # removed info var as reset does not return info
     # removed truncated as truncated does not exist: only done
 
+#CHANGES THAT NEED TO BE DONE
+    # Input is now a image, your going to have to modify it to accept the new state in both the transition array and the neural netork
+
 # Install required libraries
 # Import required libraries
 import random
