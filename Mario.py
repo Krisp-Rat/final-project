@@ -22,6 +22,7 @@ env = ResizeObservation(env, shape=(64, 64))
 state, info = env.reset()
 env.render()
 
+
 Buffer_Size = 5000
 Mario = DQN.DQN(Buffer_Size, env)
 print("Successfully Created agent")
@@ -33,21 +34,21 @@ discount = 0.99
 action = Mario.action
 
 # Run DQN here
-total_rewards = Mario.train(episodes=max_episodes, epsilon=epsilon, discount=discount, action_function=action,
-                            greedy=False)
+total_rewards = Mario.train(episodes=max_episodes, epsilon=epsilon, discount=discount, action_function=action, greedy=False)
 # testing network
 total_greedy_rewards = Mario.train(episodes=1, epsilon=epsilon, discount=discount, action_function=action, greedy=True)
 
 
 
 # testing if simulation works for MARIO, this should work fine, we just need to fix the NERUAL NETWORK for images
-done = True
-for step in range(5000):
-    if done:
-        state = env.reset()
-    state, reward, done, info = env.step(env.action_space.sample())
-    env.render()
-env.close()
+# done = False
+# for step in range(5000):
+#     if done:
+#         state, info = env.reset()
+#     state, reward, terminated, truncated, info = env.step(env.action_space.sample())
+#     done = terminated or truncated
+#     env.render()
+# env.close()
 
 # @misc{gym-super-mario-bros,
 #   author = {Christian Kauten},

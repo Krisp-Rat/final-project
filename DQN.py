@@ -44,7 +44,7 @@ class Net(nn.Module):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
-        x = x.view(x.size(0), -1)
+        x = x.view(x.size(0), x.size(1))
         x = F.relu(self.layer1(x))
         x = F.relu(self.layer2(x))
         return self.layer3(x)
@@ -58,14 +58,14 @@ class DQN:
         state, info = self.env.reset()
         # initialize replay memory to capacity N
         self.pointer = 0
-        self.policy_net = Net(len(state), self.env.action_space.n).to(device)
-        self.target_net = Net(len(state), self.env.action_space.n).to(device)
+        self.policy_net = Net(len(state.shape), self.env.action_space.n).to(device)
+        self.target_net = Net(len(state.shape), self.env.action_space.n).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())  # sync weights
 
         self.optimizer = optim.AdamW(self.policy_net.parameters(), amsgrad=True)  # auto learning rate
         # big replay memory:
         self.size = N
-        shape = (N, self.env.observation_space.shape[0], self.env.observation_space.shape[1])
+        shape = (N, self.env.observation_space.shape[0], self.env.observation_space.shape[1], 1)
         self.state_mem = torch.zeros(shape, dtype=torch.float32, device=device)
         self.next_state_mem = torch.zeros(shape, dtype=torch.float32,
                                           device=device)
@@ -102,6 +102,7 @@ class DQN:
                 self.target_net.load_state_dict(self.policy_net.state_dict())
             # initialize sequence S and preprocessed sequence o
             state, info = self.env.reset()
+            state = torch.tensor(state, device=device, dtype=torch.float32)
             done = False
             rewards = 0
             eps = epsilon ** i if not greedy else 0
@@ -111,10 +112,9 @@ class DQN:
                 # Select action
                 action_type = action_function(state, eps)
                 observation, reward, terminated, truncated, info = self.env.step(action_type.item())
-                next_state = torch.tensor(observation.squeeze(1), device=device, dtype=torch.float32)
+                next_state = torch.tensor(observation, device=device, dtype=torch.float32)
                 # Set sequence
                 done = terminated or truncated
-                print(state.shape)
                 self.append(state=state, action=action_type, reward=reward, next_state=next_state, done=done)
                 if done:
                     next_state = None
