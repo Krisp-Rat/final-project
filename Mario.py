@@ -15,7 +15,7 @@ import torch
 
 # create environment and agent + image preprocessing
 env = gym_super_mario_bros.make('SuperMarioBros-v3', apply_api_compatibility=True, render_mode="human",
-                                max_episode_steps=500)
+                                max_episode_steps=300)
 env = JoypadSpace(env, SIMPLE_MOVEMENT)
 
 # IMAGE PROCESSING HERE
@@ -39,8 +39,8 @@ total_rewards = Mario.train(episodes=max_episodes, epsilon=epsilon, discount=dis
                             greedy=False)
 print("Completed One episode of training")
 # testing network
-# total_greedy_rewards = Mario.train(episodes=1, epsilon=epsilon, discount=discount, action_function=action, greedy=True)
-
+total_greedy_rewards = Mario.train(episodes=1, epsilon=epsilon, discount=discount, action_function=action, greedy=True)
+print("Completed one greedy episode")
 
 # testing if simulation works for MARIO, this should work fine, we just need to fix the NERUAL NETWORK for images
 # done = False

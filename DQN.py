@@ -143,7 +143,7 @@ class DQN:
         else:
             # select max(Q)
             with torch.no_grad():
-                return self.policy_net(state).max(1).indices.view(1, 1)
+                action_type = self.policy_net(state.unsqueeze(1)).max(1).indices.item()
         return torch.tensor([[action_type]], device=device, dtype=torch.long)
 
     def r(self, discount):
