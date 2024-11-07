@@ -32,9 +32,9 @@ CUDA_LAUNCH_BLOCKING = 1
 class Net(nn.Module):
     def __init__(self, obs, action):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(obs, 32, kernel_size=8, stride=4)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
-        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        self.conv1 = nn.Conv2d(obs, 32, kernel_size=5, stride=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=2)
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=2)
 
         self.layer1 = nn.Linear(64 * 7 * 7, 512)
         self.layer2 = nn.Linear(512, 256)
@@ -44,7 +44,8 @@ class Net(nn.Module):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
-        x = x.view(x.size(0), x.size(1))
+        x = F.max_pool2d(x, 2)
+        x = torch.flatten(x, 1)
         x = F.relu(self.layer1(x))
         x = F.relu(self.layer2(x))
         return self.layer3(x)
@@ -55,17 +56,16 @@ class DQN:
     def __init__(self, N, env):
         # initialize environment
         self.env = env
-        state, info = self.env.reset()
         # initialize replay memory to capacity N
         self.pointer = 0
-        self.policy_net = Net(len(state.shape), self.env.action_space.n).to(device)
-        self.target_net = Net(len(state.shape), self.env.action_space.n).to(device)
+        self.policy_net = Net(1, self.env.action_space.n).to(device)
+        self.target_net = Net(1, self.env.action_space.n).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())  # sync weights
 
         self.optimizer = optim.AdamW(self.policy_net.parameters(), amsgrad=True)  # auto learning rate
         # big replay memory:
         self.size = N
-        shape = (N, self.env.observation_space.shape[0], self.env.observation_space.shape[1], 1)
+        shape = (N, 1, self.env.observation_space.shape[0], self.env.observation_space.shape[1])
         self.state_mem = torch.zeros(shape, dtype=torch.float32, device=device)
         self.next_state_mem = torch.zeros(shape, dtype=torch.float32,
                                           device=device)
@@ -96,34 +96,37 @@ class DQN:
     # Main training function
     def train(self, episodes, epsilon, discount, action_function, greedy):
         total_reward = [0] * episodes
-        # TAU = .0004
         for i in range(episodes):
             if i % 5 == 0:
                 self.target_net.load_state_dict(self.policy_net.state_dict())
             # initialize sequence S and preprocessed sequence o
             state, info = self.env.reset()
-            state = torch.tensor(state, device=device, dtype=torch.float32)
+            state = torch.tensor(state, device=device, dtype=torch.float32).transpose(0, 2)
             done = False
-            rewards = 0
+            rewards = step = 0
             eps = epsilon ** i if not greedy else 0
-            step = 0
             while not done:
-                step += 1
                 # Select action
                 action_type = action_function(state, eps)
                 observation, reward, terminated, truncated, info = self.env.step(action_type.item())
-                next_state = torch.tensor(observation, device=device, dtype=torch.float32)
-                # Set sequence
+                next_state = torch.tensor(observation, device=device, dtype=torch.float32).transpose(0, 2)
                 done = terminated or truncated
+
+                # store transition in replay buffer
                 self.append(state=state, action=action_type, reward=reward, next_state=next_state, done=done)
+
+                # if the episode is over set the next state to none
+                done = terminated or truncated
                 if done:
                     next_state = None
+
                 rewards += reward
-                # store transition in replay buffer
                 state = next_state
 
                 self.r(discount)
-                if greedy == True:
+                step += 1
+
+                if greedy:
                     self.env.render()
                 if step > 500:
                     done = True
