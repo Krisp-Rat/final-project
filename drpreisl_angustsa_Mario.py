@@ -1,12 +1,12 @@
 # make sure to use python 3.8, use virtual enviornment (to make terminal also 3.8) and reopen vscode 
 from gym.wrappers import GrayScaleObservation
-from gym.wrappers import ResizeObservation  # these things also use cv2, pip install it
+from gym.wrappers import ResizeObservation  # these things also use cv2, pip install it (opencv-python)
 from nes_py.wrappers import JoypadSpace
 
 import gym_super_mario_bros  # install the VS code Developer kit?? refer to nes_py
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 # import retro # use to import sonic, #don't worry about it for now
-import DQN  # our assignment 2 DQN modified for gym instead of gymnasium, may change later
+from drpreisl_angus_tsa_DQN import DQN # our assignment 2 DQN modified for gym instead of gymnasium, may change later
 import torch
 
 # CHANGES THAT NEED TO BE DONE:
@@ -25,7 +25,7 @@ state, info = env.reset()
 env.render()
 
 Buffer_Size = 5000
-Mario = DQN.DQN(Buffer_Size, env)
+Mario = DQN(Buffer_Size, env)
 print("Successfully Created agent")
 
 # HyperParameters:
