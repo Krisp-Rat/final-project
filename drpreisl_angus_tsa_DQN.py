@@ -49,7 +49,27 @@ class Net(nn.Module):
         x = F.relu(self.layer1(x))
         x = F.relu(self.layer2(x))
         return self.layer3(x)
+    
+# class Net(nn.Module):
+#     def __init__(self, obs, action):
+#         super(Net, self).__init__()
+#         self.conv1 = nn.Conv2d(obs, 32, kernel_size=5, stride=1)
+#         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=2)
+#         self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=2)
 
+#         self.layer1 = nn.Linear(64 * 7 * 7, 512)
+#         self.layer2 = nn.Linear(512, 256)
+#         self.layer3 = nn.Linear(256, action)
+
+#     def forward(self, x):
+#         x = F.relu(self.conv1(x))
+#         x = F.relu(self.conv2(x))
+#         x = F.relu(self.conv3(x))
+#         x = F.max_pool2d(x, 2)
+#         x = torch.flatten(x, 1)
+#         x = F.relu(self.layer1(x))
+#         x = F.relu(self.layer2(x))
+#         return self.layer3(x)
 
 class DQN:
     # initialize values
@@ -122,13 +142,13 @@ class DQN:
 
                 rewards += reward
                 state = next_state
-
-                self.r(discount)
+                if self.pointer%5 == 0 :
+                    self.r(discount)
                 step += 1
 
                 if greedy:
                     self.env.render()
-                if step > 500:
+                if step > 1000:
                     done = True
 
             # Decay epsilon after every episode
