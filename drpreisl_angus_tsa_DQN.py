@@ -50,27 +50,6 @@ class Net(nn.Module):
         x = F.relu(self.layer2(x))
         return self.layer3(x)
     
-# class Net(nn.Module):
-#     def __init__(self, obs, action):
-#         super(Net, self).__init__()
-#         self.conv1 = nn.Conv2d(obs, 32, kernel_size=5, stride=1)
-#         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=2)
-#         self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=2)
-
-#         self.layer1 = nn.Linear(64 * 7 * 7, 512)
-#         self.layer2 = nn.Linear(512, 256)
-#         self.layer3 = nn.Linear(256, action)
-
-#     def forward(self, x):
-#         x = F.relu(self.conv1(x))
-#         x = F.relu(self.conv2(x))
-#         x = F.relu(self.conv3(x))
-#         x = F.max_pool2d(x, 2)
-#         x = torch.flatten(x, 1)
-#         x = F.relu(self.layer1(x))
-#         x = F.relu(self.layer2(x))
-#         return self.layer3(x)
-
 class DQN:
     # initialize values
     def __init__(self, N, env):
@@ -142,7 +121,7 @@ class DQN:
 
                 rewards += reward
                 state = next_state
-                if self.pointer%5 == 0 :
+                if self.pointer%10 == 0 :
                     self.r(discount)
                 step += 1
 
@@ -201,9 +180,15 @@ class DQN:
         self.optimizer.step()
 
     # Save/load the current weights
+
     def load(self, filename):
         with open(filename, 'rb') as file:
-            pickle.load(self.policy_net.state_dict(), file, protocol=pickle.HIGHEST_PROTOCOL)
+            # Load the state dict from the file
+            state_dict = pickle.load(file)
+            # Apply the state dict to the model
+            self.policy_net.load_state_dict(state_dict)
+            # Optionally, set the model to evaluation mode
+            self.policy_net.eval()
 
     def save(self, filename):
         with open(filename, 'wb') as file:
