@@ -11,7 +11,7 @@
 import random
 import gym
 from gym import spaces
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 import torch
@@ -127,7 +127,7 @@ class DQN:
 
                 if greedy:
                     self.env.render()
-                if step > 1000:
+                if step > 500:
                     done = True
 
             # Decay epsilon after every episode
