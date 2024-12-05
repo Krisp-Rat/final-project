@@ -110,7 +110,7 @@ class DQN:
                 observation, reward, terminated, truncated, info = self.env.step(action_type.item())
                 next_state = torch.tensor(observation, device=device, dtype=torch.float32).transpose(0, 2)
                 done = terminated or truncated
-
+                print(state.shape)
                 # store transition in replay buffer
                 self.append(state=state, action=action_type, reward=reward, next_state=next_state, done=done)
 
@@ -121,7 +121,7 @@ class DQN:
 
                 rewards += reward
                 state = next_state
-                if self.pointer%10 == 0 :
+                if self.pointer % 10 == 0:
                     self.r(discount)
                 step += 1
 
